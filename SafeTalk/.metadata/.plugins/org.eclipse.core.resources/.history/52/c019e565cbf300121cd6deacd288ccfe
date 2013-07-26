@@ -1,0 +1,18 @@
+package com.drexel.duca;
+
+import com.drexel.duca.frontend.*;
+import com.drexel.duca.backend.*;
+import javax.swing.JOptionPane;
+
+public class SafeTalk {
+	public static void main(String[] args) {
+		String otherUser=JOptionPane.showInputDialog(null, "Enter the Username of the perosn who you want to add.");
+		System.out.println(otherUser);
+		 java.awt.EventQueue.invokeLater(new Runnable() {
+	            public void run() {
+	                
+	                new ChatWindow().setVisible(true);
+	            }
+		 });
+	}
+}

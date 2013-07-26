@@ -1,0 +1,10 @@
+package com.drexel.duca.backend;
+
+import java.net.Socket;
+
+public class ChatSession extends Thread {
+	public ChatSession(Socket s)
+	{
+		
+	}
+}

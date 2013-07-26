@@ -1,0 +1,32 @@
+package com.drexel.duca.backend;
+
+import com.drexel.duca.frontend.*;
+import java.io.IOException;
+
+public class ListenFromServer extends Thread {
+
+	public void run() {
+		while(true) {
+			try {
+				String msg = (String) sInput.readObject();
+				// if console mode print the message and add back the prompt
+				if(chatWindow == null) {
+					System.out.println(msg);
+					System.out.print("> ");
+				}
+				else {
+					chatWindow.append(msg);
+				}
+			}
+			catch(IOException e) {
+				display("Server has close the connection: " + e);
+				if(chatWindow != null) 
+					chatWindow.connectionFailed();
+				break;
+			}
+			// can't happen with a String object but need the catch anyhow
+			catch(ClassNotFoundException e2) {
+			}
+		}
+	}
+}

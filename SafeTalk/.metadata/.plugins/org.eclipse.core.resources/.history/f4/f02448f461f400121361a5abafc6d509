@@ -1,0 +1,66 @@
+package com.drexel.duca.backend;
+
+import java.io.*;
+/*
+ * This class defines the different type of messages that will be exchanged between the
+ * Clients and the Server. 
+ * When talking from a Java Client to a Java Server a lot easier to pass Java objects, no 
+ * need to count bytes or to wait for a line feed at the end of the frame
+ */
+public class ChatMessage implements Serializable {
+
+	protected static final long serialVersionUID = 1112122200L;
+
+	// The different types of message sent by the Client
+	// WHOISIN to receive the list of the users connected
+	// MESSAGE an ordinary message
+	// LOGOUT to disconnect from the Server
+	private static final int WHOISIN = 0;
+
+	private static final int MESSAGE = 1;
+
+	private static final int LOGOUT = 2;
+	private int type;
+	private String message;
+	
+	// constructor
+	public ChatMessage(int type, String message) {
+		this.type = type;
+		this.message = message;
+	}
+	public void connectionFailed() {
+		login.setEnabled(true);
+		logout.setEnabled(false);
+		whoIsIn.setEnabled(false);
+		label.setText("Enter your username below");
+		tf.setText("Anonymous");
+		// reset port number and host name as a construction time
+		tfPort.setText("" + defaultPort);
+		tfServer.setText(defaultHost);
+		// let the user change them
+		tfServer.setEditable(false);
+		tfPort.setEditable(false);
+		// don't react to a <CR> after the username
+		tf.removeActionListener(this);
+		connected = false;
+	}
+	// getters
+	public static int getWHOISIN()
+	{
+		return WHOISIN;
+	}
+	public static int getMESSAGE()
+	{
+		return MESSAGE;
+	}
+	public static int getLOGOUT()
+	{
+		return LOGOUT;
+	}
+	int getType() {
+		return type;
+	}
+	String getMessage() {
+		return message;
+	}
+}

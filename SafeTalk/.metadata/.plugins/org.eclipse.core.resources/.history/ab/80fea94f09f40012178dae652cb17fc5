@@ -1,0 +1,95 @@
+package com.drexel.duca.backend;
+
+import java.io.*;
+import java.net.*;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Scanner;
+
+import com.drexel.duca.backend.Server1.ClientThread;
+import com.drexel.duca.frontend.SafeTalkGUI;
+import com.drexel.duca.frontend.ServerGUI;
+
+public class Server {
+	private static int uniqueId;
+	// an ArrayList to keep the list of the Client
+	private ArrayList<ClientThread> al;
+	// if I am in a GUI
+	private ServerGUI sg;
+	// to display time
+	private SimpleDateFormat sdf;
+	// the port number to listen for connection
+	private int port;
+	// the boolean that will be turned of to stop the server
+	private boolean keepGoing;
+	
+	public static void main(String[] args) throws IOException{
+            ServerSocket ss = new ServerSocket(5556);
+            Socket s = ss.accept();
+            ReaderWriter wr = new ReaderWriter(System.in, s.getOutputStream(), true);
+            ReaderWriter rw = new ReaderWriter(s.getInputStream(), System.out, false);
+            rw.start(); wr.start();
+            ss.close();
+	}
+        public boolean start() {
+		// try to connect to the server
+		try {
+			socket = new Socket(server, port);
+		} 
+		// if it failed not much I can so
+		catch(Exception ec) {
+			display("Error connectiong to server:" + ec);
+			return false;
+		}
+		
+		String msg = "Connection accepted " + socket.getInetAddress() + ":" + socket.getPort();
+		display(msg);
+	
+		/* Creating both Data Stream */
+		try
+		{
+			sInput  = new ObjectInputStream(socket.getInputStream());
+			sOutput = new ObjectOutputStream(socket.getOutputStream());
+		}
+		catch (IOException eIO) {
+			display("Exception creating new Input/output Streams: " + eIO);
+			return false;
+		}
+
+		// creates the Thread to listen from the server 
+		new ListenFromServer().start();
+		// Send our username to the server this is the only message that we
+		// will send as a String. All other messages will be ChatMessage objects
+		try
+		{
+			sOutput.writeObject(username);
+		}
+		catch (IOException eIO) {
+			display("Exception doing login : " + eIO);
+			disconnect();
+			return false;
+		}
+		// success we inform the caller that it worked
+		return true;
+	}
+	synchronized void remove(int id) {
+		// scan the array list until we found the Id
+		for(int i = 0; i < al.size(); ++i) {
+			ClientThread ct = al.get(i);
+			// found it
+			if(ct.id == id) {
+				al.remove(i);
+				return;
+			}
+		}
+	}
+	private void display(String msg) {
+		String time = sdf.format(new Date()) + " " + msg;
+		if(sg == null)
+			System.out.println(time);
+		else
+			sg.appendEvent(time + "\n");
+	}
+
+}

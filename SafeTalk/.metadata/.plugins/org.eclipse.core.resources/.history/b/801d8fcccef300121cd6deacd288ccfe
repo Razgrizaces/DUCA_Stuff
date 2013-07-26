@@ -1,0 +1,6 @@
+package com.drexel.duca.backend;
+
+public class Snippet {
+	MessageDialog(null, "Enter the Username of the perosn who you want to add.");
+}
+

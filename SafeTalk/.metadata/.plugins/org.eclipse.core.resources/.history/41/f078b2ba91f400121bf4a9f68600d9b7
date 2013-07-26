@@ -1,0 +1,33 @@
+package com.drexel.duca.backend;
+
+import java.net.ServerSocket;
+
+import com.drexel.duca.frontend.SafeTalkLogin;
+
+public class Server implements Runnable {
+    private int port;
+
+    public Server(int port) {
+        this.port = port;
+    }
+
+    @Override
+    public void run() {
+        ServerSocket ss = new ServerSocket(port);
+        while(true) {
+            ss.accept();
+            java.awt.EventQueue.invokeLater(new Runnable() {
+                public void run() {
+                    try {
+                        ChatWindow chatWindow = new ChatWindow(ss);
+                        chatWindow.getJFrame().setVisible(true);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+        }
+    }
+}
+

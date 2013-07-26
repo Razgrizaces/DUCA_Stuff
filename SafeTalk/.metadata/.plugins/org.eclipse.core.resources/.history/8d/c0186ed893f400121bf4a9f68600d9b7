@@ -1,0 +1,47 @@
+package com.drexel.duca.backend;
+
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+
+import com.drexel.duca.frontend.ChatWindow;
+
+public class Client implements Runnable {
+    private int port;
+
+    public Client(int port) {
+        this.port = port;
+    }
+
+    private class ChatWindowCreator implements Runnable {
+        private Socket chatWindowSocket;
+
+        ChatWindowCreator(Socket chatWindowSocket) {
+            this.chatWindowSocket = chatWindowSocket;
+        }
+
+        @Override
+        public void run() {
+            try {
+                ChatWindow chatWindow = new ChatWindow(chatWindowSocket);
+                chatWindow.getChatWindowFrame().setVisible(true);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Override
+    public void run() {
+        try {
+            ServerSocket serverSocket = new ServerSocket(port);
+            while (true) {
+                Socket socket = serverSocket.accept();
+                java.awt.EventQueue.invokeLater(new ChatWindowCreator(socket));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+}

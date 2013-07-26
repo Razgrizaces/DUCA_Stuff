@@ -1,0 +1,252 @@
+package com.drexel.duca.frontend;
+
+import java.awt.Frame;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
+
+import javax.swing.JTextArea;
+
+import com.drexel.duca.backend.Server;
+
+public class ChatWindow extends javax.swing.JFrame {
+
+	private Frame frame;
+	private javax.swing.JButton jButton1;
+	private javax.swing.JPanel jPanel1;
+	private javax.swing.JPanel jPanel2;
+	private javax.swing.JPanel jPanel3;
+	private javax.swing.JScrollPane jScrollPane1;
+	private javax.swing.JTextArea jTextArea1;
+	private javax.swing.JTextField jTextField1;
+	private static final long serialVersionUID = 1L;
+
+	private Socket socket;
+	private ObjectInputStream sInput;
+	private ObjectOutputStream sOutput;
+
+	/**
+	 * Create the application.
+	 */
+	public ChatWindow(Socket socket) {
+		try {
+			sInput = new ObjectInputStream(socket.getInputStream());
+			sOutput = new ObjectOutputStream(socket.getOutputStream());
+			initialize();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Initialize the contents of the frame.
+	 */
+	private void initialize() {
+		jPanel1 = new javax.swing.JPanel();
+		jPanel2 = new javax.swing.JPanel();
+		jScrollPane1 = new javax.swing.JScrollPane();
+		jTextArea1 = new javax.swing.JTextArea();
+		jTextField1 = new javax.swing.JTextField();
+		jPanel3 = new javax.swing.JPanel();
+		jButton1 = new javax.swing.JButton();
+
+		javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(
+				jPanel1);
+		jPanel1.setLayout(jPanel1Layout);
+		jPanel1Layout.setHorizontalGroup(jPanel1Layout.createParallelGroup(
+				javax.swing.GroupLayout.Alignment.LEADING).addGap(0, 400,
+				Short.MAX_VALUE));
+		jPanel1Layout.setVerticalGroup(jPanel1Layout.createParallelGroup(
+				javax.swing.GroupLayout.Alignment.LEADING).addGap(0, 100,
+				Short.MAX_VALUE));
+
+		setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+		getContentPane().setLayout(
+				new javax.swing.BoxLayout(getContentPane(),
+						javax.swing.BoxLayout.Y_AXIS));
+		jTextArea1.setEditable(false);
+		jTextArea1.setColumns(20);
+		jTextArea1.setRows(5);
+		jTextArea1.setWrapStyleWord(true);
+		jTextArea1.setColumns(20);
+		jTextArea1.setRows(5);
+		jTextArea1.setLineWrap(true);
+		jScrollPane1.setViewportView(jTextArea1);
+
+		jTextField1.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				jTextField1ActionPerformed(evt);
+			}
+		});
+
+		javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(
+				jPanel2);
+		jPanel2.setLayout(jPanel2Layout);
+		jPanel2Layout
+				.setHorizontalGroup(jPanel2Layout
+						.createParallelGroup(
+								javax.swing.GroupLayout.Alignment.LEADING)
+						.addGroup(
+								jPanel2Layout
+										.createSequentialGroup()
+										.addGap(0, 0, Short.MAX_VALUE)
+										.addGroup(
+												jPanel2Layout
+														.createParallelGroup(
+																javax.swing.GroupLayout.Alignment.LEADING)
+														.addComponent(
+																jScrollPane1,
+																javax.swing.GroupLayout.Alignment.TRAILING,
+																javax.swing.GroupLayout.PREFERRED_SIZE,
+																400,
+																javax.swing.GroupLayout.PREFERRED_SIZE)
+														.addComponent(
+																jTextField1,
+																javax.swing.GroupLayout.Alignment.TRAILING,
+																javax.swing.GroupLayout.PREFERRED_SIZE,
+																400,
+																javax.swing.GroupLayout.PREFERRED_SIZE))));
+		jPanel2Layout
+				.setVerticalGroup(jPanel2Layout
+						.createParallelGroup(
+								javax.swing.GroupLayout.Alignment.LEADING)
+						.addGroup(
+								jPanel2Layout
+										.createSequentialGroup()
+										.addComponent(
+												jScrollPane1,
+												javax.swing.GroupLayout.DEFAULT_SIZE,
+												161, Short.MAX_VALUE)
+										.addPreferredGap(
+												javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+										.addComponent(
+												jTextField1,
+												javax.swing.GroupLayout.PREFERRED_SIZE,
+												43,
+												javax.swing.GroupLayout.PREFERRED_SIZE)));
+		getContentPane().add(jPanel2);
+		jPanel3.setLayout(new java.awt.BorderLayout());
+		jButton1.setText("Send");
+		jButton1.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				jButton1ActionPerformed(evt);
+			}
+		});
+		jPanel3.add(jButton1, java.awt.BorderLayout.CENTER);
+		getContentPane().add(jPanel3);
+		pack();
+	}
+
+	// enter button pressed
+	private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {
+		jTextField1.addKeyListener(new KeyListener() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				// TODO Auto-generated method stub
+			}
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				// TODO Auto-generated method stub
+			}
+
+			@Override
+			public void keyTyped(KeyEvent e) {
+				if (e.getKeyChar() == 10) {
+					client.sendMessage(new ChatMessage(
+							ChatMessage.getMESSAGE(), jTextField1.getText()));
+					sendText();
+				}
+			}
+		});
+
+	}
+
+	public JTextArea getTextArea() {
+		return jTextArea1;
+	}
+
+	private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {
+		// jTextArea1.append(jTextField1.getText() + "\n");
+		// jTextArea1.setLineWrap(true);
+		client.sendMessage(new ChatMessage(ChatMessage.getMESSAGE(),
+				jTextField1.getText()));
+		sendText();
+	}
+
+	public void sendMessage(ChatMessage msg) {
+		try {
+			server = new Server(port);
+			sOutput.writeObject(msg);
+		} catch (IOException e) {
+			display("Exception writing to server: " + e);
+		}
+	}
+
+	public void sendText() {
+		if (jTextField1.getText().equals("")) {
+
+		} else {
+			jTextArea1.append(jTextField1.getText() + "\n");
+			jTextField1.setText("");
+		}
+	}
+
+	public void receiveText(String str) {
+		jTextArea1.append(str + "\n");
+
+	}
+
+	public void append(String str) {
+		jTextArea1.append(str);
+		jTextArea1.setCaretPosition(jTextArea1.getText().length() - 1);
+	}
+
+	// called by the GUI is the connection failed
+	// we reset our buttons, label, textfield
+	public void connectionFailed() {
+		// reset port number and host name as a construction time
+		// code to set port
+		// tfPort.setText("" + defaultPort);
+		// tfServer.setText(defaultHost);
+		// let the user change them
+		// don't react to a <CR> after the username
+	}
+
+	// we should probably start the server..
+	// ping or send a message to other person to start the chat...
+	// then allow the people to chat with each other.
+	// public void actionPerformed(ActionEvent e) {
+	//
+	// String username = "something to get username";
+	// // empty username ignore it
+	//
+	// // empty serverAddress ignore it
+	// String server = "thisistheipaddress";
+	//
+	// String portNumber = "this is the port number";
+	// int port = 0;
+	// try {
+	// port = Integer.parseInt(portNumber);
+	// }
+	// catch(Exception en) {
+	// return; // nothing I can do if port number is not valid
+	// }
+	//
+	// // try creating a new Client with GUI
+	// client = new Client(server, port, username);
+	// // test if we can start the Client
+	// if(!client.start())
+	// return;
+	// jTextField1.setText("");
+	// connected = true;
+	// // Action listener for when the user enter a message
+	// jTextField1.addActionListener((ActionListener) this);
+	// }
+	public Frame getFrame() {
+		return frame;
+	}
+}

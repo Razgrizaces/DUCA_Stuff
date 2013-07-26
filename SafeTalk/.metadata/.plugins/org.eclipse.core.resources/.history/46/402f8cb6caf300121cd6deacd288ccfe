@@ -1,0 +1,11 @@
+package com.drexel.duca;
+
+import com.drexel.duca.frontend.*;
+import com.drexel.duca.backend.*;
+
+public class SafeTalk {
+	public static void main(String[] args) {
+		ChatWindow cw = new ChatWindow();
+		cw.
+	}
+}

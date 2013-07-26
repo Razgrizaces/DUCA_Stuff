@@ -1,0 +1,280 @@
+package com.drexel.duca.frontend;
+
+import java.io.*;
+import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+
+    //Objectives through Thursday Afternoon. (X) = done
+    //()okay, so basically make it so you can connect to another person..., 
+    //also make it so when you create a new connection, you are the client, they are the server.
+    //()make a new tab for each connection <--- tricky... might need to be done later.
+    //()create another server instance, or just one server and create another tab for
+    //()another person to connect. 
+    //()send a message to the other person telling them you want to connect, 
+    //ie)writeBytes(connectMessage),
+    //()increase port number so we don't deal with the issue of connecting to multiple ports
+    //()move this to a GUI, have it display message to textArea from Text Field from other person
+    // through WEDNESDAY ^^ should be done with this.
+    //()connect the friendslist to the database.
+    //()connect the chat program to the friendslist.
+    //()use usernames and the database to pull data and connect to other IPs.
+    //Thursday Afternoon ^^
+    //()FINISH, work on layout.
+    //^^all of Thursday/rest of Thursday.
+    //good luck and have fun.
+
+public class ReaderWriter extends Thread
+{
+
+	private InputStream is;
+	private OutputStream os;
+        private int a, b, c, d, e, m;
+        private boolean isInput;
+        private JTextArea textArea;
+        private JTextField textField;
+        private int clientID;
+        private String user;
+        private String in, out;
+        //@param input = writing to person
+        //output = reading to person
+        //numbers = the array of vars from a, b, c, d, e, m and r for encryption. 
+        //Numbers contains 7 ints
+	public ReaderWriter(InputStream input, OutputStream output, boolean isIn)
+	{
+            is = input;
+            os = output;
+            isInput = isIn;
+            a = getNthPrime(99);
+            b = getNthPrime(101);
+            c = a*b;
+            m = (a-1)*(b-1);
+            e = getCoprime(m);
+            d = modulo(e, (totient(m)-1),m);
+                
+	}
+        public ReaderWriter(InputStream input, OutputStream output)
+	{
+		is = input;
+		os = output;
+	}
+        public boolean getIsInput()
+        {
+            return isInput;
+        }
+        public InputStream getIs()
+        {
+            return is;
+        }
+        public OutputStream getOs()
+        {
+            return os;
+        }
+        
+        public int get(char character)
+        {
+            if(character=='a')
+                return a;
+            else if(character=='b')
+                return b;
+            else if(character=='c')
+                return c;
+            else if(character=='d')
+                return d;
+            else if(character=='e')
+                return e;
+            else if(character=='m')
+                return m;
+            else
+                return 0;
+        }
+        public void setD(int abc)
+        {
+            d = abc;
+        }
+        public void setE(int abc)
+        {
+            e = abc;
+        }
+        public void setC(int abc)
+        {
+            c = abc;
+        }
+	public void run()
+	{
+            Scanner s = new Scanner(is);
+            PrintStream ps= new PrintStream(os);
+            while(true)
+            {
+            //code to read input 
+                String input = s.nextLine();
+                
+                if(isInput){
+                    int[] inputs = encrypt(input, get('d'), get('c'));
+                    for(int i:inputs)
+                        ps.print(i+" ");
+                    //ps.println();
+                }
+                else if(!isInput)
+                {
+                    System.out.println(input);
+                    String [] readInput = input.split(" ");
+                    int [] readingInput = new int[readInput.length];
+                    for(int i = 0; i < readInput.length;i++)
+                    {
+                        int readIn = Integer.parseInt(readInput[i]);
+                        readingInput[i]=readIn;
+                        
+                    }
+                    String decrypted= decrypt(readingInput, get('e'), get('c'));
+                    ps.println(decrypted);
+                    printGUI(decrypted);
+                }
+                
+            }
+	}
+       public int getPublicKey()
+       {
+           return c;
+       }
+       public int getPrivateKey()
+       {
+           return d;
+       }
+       public int getKeySimilar()
+       {
+           return e;
+       }
+    public static int getNthPrime(int n)
+    {
+        int p = 2;
+        int out = 0;
+        while(out<n)
+        {
+            p++;
+            if(isPrime(p))
+            {
+                out++;
+            }
+        }
+        return p;
+    }
+    public static boolean isPrime(int n)
+    {
+        boolean output = true;
+        for(int i = 2; i<n;i++)
+        {
+            if(n%i==0)
+            {
+                output = false;
+            }
+                
+        }
+        return output;
+    }
+    public static int GCD(int a, int b)
+    {
+        if(b==0)
+            return a;
+        return GCD(b, a%b);
+    }
+    public static int getCoprime(int n)
+    {
+        int coprime = -1;
+        for(int i = 1; i<3*n; i++)
+        {
+            if(GCD(i, n)==1)
+              coprime = i;  
+        }
+        return coprime;
+    }
+    //count all numbers coprime to n, from 1 to n-1
+    public static int totient(int n)
+    {
+        int count = 0;
+        for(int i = 1; i<n; i++)
+        {
+            if(GCD(n, i)==1)
+                count ++;
+        }
+        return count;
+    }
+    public static int modulo(int a, int b, int c)
+    {
+        long x = 1;
+        long y = a;
+        while(b>0)
+        {
+            if(b%2==1)
+                x=(x*y)%c;
+            y = (y*y)%c;
+            b /=2;
+        }
+        return (int)x %c;//... c == 0;
+    }
+    //@param word is any string.
+    //E is any number coprime to M
+    //c is a*b.
+    //encrypt with your public key...
+    //decrypt with your private key...
+    public int[] encrypt(String word, int e, int c)
+    {
+        int[] encryption =  new int [word.length()];
+        if(word.equals(null) || word.length()==0)
+        {
+           return encryption;
+        }
+        for(int i = 0; i<word.length();i++)
+        {
+            int let = word.charAt(i);
+            int enc = modulo(let, e, c);
+            encryption[i]=enc;
+        }
+        
+        return encryption;
+    }
+    //@Param 
+    //int[] encrypted - an array of encrypted letters, numbers, or symbols.
+    //int d = private key
+    //int c = private key
+    public String decrypt(int[] encrypted, int d, int c)
+    {
+        if(encrypted.length==0)
+        {
+            return "";
+        }
+        int num = 0;
+        String word = "";
+        for(int i = 0; i<encrypted.length;i++)
+        {
+            num = encrypted[i];
+            int dec = modulo(num, d, c);
+            char ch = (char) dec;
+            word = word+ch;
+        }
+        //System.out.println(d); 
+       return word;
+            //System.out.println("That decrypts to " +ch);
+        
+    }
+    public static void printArray(int[] array)
+    {
+        for(int i =0; i < array.length;i++)
+        {
+            System.out.println(array[i]);
+        }
+    }
+    public void printGUI(String msg)
+    {
+        JTextArea ta = stGUI.getTextArea();
+        ta.append(msg);
+    }
+    public void printGUIS(String msg)
+    {
+        JTextArea ta = stsGUI.getTextArea();
+        ta.append(msg);
+    }
+    
+}
